@@ -6,11 +6,14 @@ item --menu main debian Debian, Ubuntu
 item --menu main win    Windows
 item --menu main exit   Continue Normal Boot
 choose --menu main --default exit --timeout 5000 os || goto exit
-set mirror-server http://mirrors.tuna.tsinghua.edu.cn
+set mirror-proto http
+set mirror-host mirrors.tuna.tsinghua.edu.cn
+set mirror-url ${mirror-proto}://${mirror-host}
 goto ${os}
 
 :debian
 set deb-release debian
+set deb-secure-opt apt-setup/security_host=debian-security.tuna.tsinghua.edu.cn
 set deb-dist jessie
 set deb-arch amd64
 set deb-rescue false
@@ -34,9 +37,11 @@ iseq ${deb-release} ${deb-release-new} && goto debian-choose-release-change-no |
 goto debian-choose-release-change-${deb-release-new}
 :debian-choose-release-change-debian
 set deb-dist jessie
+set deb-secure-opt apt-setup/security_host=debian-security.tuna.tsinghua.edu.cn
 goto debian-choose-release-change-no
 :debian-choose-release-change-ubuntu
 set deb-dist xenial
+set deb-secure-opt apt-setup/security_host=${mirror-host} apt-setup/security_path=/ubuntu
 goto debian-choose-release-change-no
 :debian-choose-release-change-no
 set deb-release ${deb-release-new}
@@ -81,10 +86,10 @@ imgexec tftp://${net0/next-server}/\boot\x86\wdsnbp.com
 exit
 
 :debian-boot
-set deb-base-dir ${mirror-server}/${deb-release}/dists/${deb-dist}/main/installer-${deb-arch}/current/images/netboot/${deb-release}-installer/${deb-arch}
-kernel ${deb-base-dir}/linux mirror/country=manual mirror/protocol=http mirror/http/hostname=mirrors.tuna.tsinghua.edu.cn mirror/http/directory=/${deb-release}/ mirror/http/proxy= rescue/enable=${deb-rescue} || goto debian-boot-failed
+set deb-base-dir ${mirror-url}/${deb-release}/dists/${deb-dist}/main/installer-${deb-arch}/current/images/netboot/${deb-release}-installer/${deb-arch}
+kernel ${deb-base-dir}/linux mirror/country=manual mirror/protocol=${mirror-proto} mirror/${mirror-proto}/hostname=${mirror-host} mirror/${mirror-proto}/directory=/${deb-release} mirror/${mirror-proto}/proxy= rescue/enable=${deb-rescue} ${deb-secure-opt} || goto debian-boot-failed
 initrd ${deb-base-dir}/initrd.gz || goto debian-boot-failed
-boot
+boot || goto debian-boot-failed
 :debian-boot-failed
 prompt Boot failed. Press enter to go back.
 goto debian-chooser
