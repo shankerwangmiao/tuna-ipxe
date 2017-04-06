@@ -1,0 +1,91 @@
+#!ipxe
+
+:main-menu
+menu --name main Please choose an OS
+item --menu main debian Debian, Ubuntu
+item --menu main win    Windows
+item --menu main exit   Continue Normal Boot
+choose --menu main --default exit --timeout 5000 os || goto exit
+set mirror-server http://mirrors.tuna.tsinghua.edu.cn
+goto ${os}
+
+:debian
+set deb-release debian
+set deb-dist jessie
+set deb-arch amd64
+set deb-rescue false
+:debian-chooser
+menu --name debian-chooser Install or Rescue a Debian System
+item --menu debian-chooser debian-choose-release Release: ${deb-release}
+item --menu debian-chooser debian-choose-dist Version: ${deb-dist}
+item --menu debian-chooser debian-choose-arch Architecture: ${deb-arch}
+item --menu debian-chooser debian-choose-rescue Rescue a Broken System: ${deb-rescue}
+item --menu debian-chooser debian-boot Boot Selected System
+item --menu debian-chooser main-menu Go Back
+choose --menu debian-chooser --default ${debian-chooser-edit-option} debian-chooser-edit-option || goto main-menu
+goto ${debian-chooser-edit-option}
+
+:debian-choose-release
+menu --name debian-choose-release Release
+item --menu debian-choose-release debian Debian
+item --menu debian-choose-release ubuntu Ubuntu
+choose --menu debian-choose-release --default ${deb-release} deb-release-new ||
+iseq ${deb-release} ${deb-release-new} && goto debian-choose-release-change-no ||
+goto debian-choose-release-change-${deb-release-new}
+:debian-choose-release-change-debian
+set deb-dist jessie
+goto debian-choose-release-change-no
+:debian-choose-release-change-ubuntu
+set deb-dist xenial
+goto debian-choose-release-change-no
+:debian-choose-release-change-no
+set deb-release ${deb-release-new}
+goto debian-chooser
+
+:debian-choose-dist
+goto debian-choose-dist-${deb-release}
+
+:debian-choose-dist-debian
+menu --name debian-choose-dist-debian Debian Versions
+item --menu debian-choose-dist-debian jessie Debian Jessie 8
+item --menu debian-choose-dist-debian wheezy Debian Wheezy 7
+choose --menu debian-choose-dist-debian --default ${deb-dist} deb-dist ||
+goto debian-chooser
+
+:debian-choose-dist-ubuntu
+menu --name debian-choose-dist-ubuntu Ubuntu Versions
+item --menu debian-choose-dist-ubuntu xenial Ubuntu Xenial 16.04
+item --menu debian-choose-dist-ubuntu trusty Ubuntu Trusty 14.04
+choose --menu debian-choose-dist-ubuntu --default ${deb-dist} deb-dist ||
+goto debian-chooser
+
+:debian-choose-arch
+menu --name debian-choose-arch Architecture
+item --menu debian-choose-arch amd64 x86-64
+item --menu debian-choose-arch i386 x86
+choose --menu debian-choose-arch --default ${deb-arch} deb-arch ||
+goto debian-chooser
+
+:debian-choose-rescue
+menu --name debian-choose-rescue Rescue a Broken System
+item --menu debian-choose-rescue false No
+item --menu debian-choose-rescue true Yes
+choose --menu debian-choose-rescue --default ${deb-rescue} deb-rescue
+goto debian-chooser
+
+:win
+set net0/next-server 0.0.0.0
+imgexec tftp://${net0/next-server}/\boot\x86\wdsnbp.com
+
+:exit
+exit
+
+:debian-boot
+set deb-base-dir ${mirror-server}/${deb-release}/dists/${deb-dist}/main/installer-${deb-arch}/current/images/netboot/${deb-release}-installer/${deb-arch}
+kernel ${deb-base-dir}/linux mirror/country=manual mirror/protocol=http mirror/http/hostname=mirrors.tuna.tsinghua.edu.cn mirror/http/directory=/${deb-release}/ mirror/http/proxy= rescue/enable=${deb-rescue} || goto debian-boot-failed
+initrd ${deb-base-dir}/initrd.gz || goto debian-boot-failed
+boot
+:debian-boot-failed
+prompt Boot failed. Press enter to go back.
+goto debian-chooser
+
