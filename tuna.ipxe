@@ -2,6 +2,12 @@
 
 :main-menu
 menu --name main Please choose an OS
+item --menu main --gap  ******************** WARNING *******************
+item --menu main --gap  * This PXE system is for system installation ${} ${} *
+item --menu main --gap  * or repairing. Misuse can lead to PERMANENT ${} ${} *
+item --menu main --gap  * DATA LOSS. Use with care. ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} ${} *
+item --menu main --gap  ************************************************
+item --menu main --gap  If you cannot understand, do NOTHING and exit.
 item --menu main debian Debian, Ubuntu
 item --menu main win    Windows
 item --menu main exit   Continue Normal Boot
