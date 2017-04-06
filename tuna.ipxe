@@ -15,6 +15,7 @@ choose --menu main --default exit --timeout 5000 os || goto exit
 set mirror-proto http
 set mirror-host mirrors.tuna.tsinghua.edu.cn
 set mirror-url ${mirror-proto}://${mirror-host}
+set kernel-append
 goto ${os}
 
 :debian
@@ -31,9 +32,14 @@ item --menu debian-chooser debian-choose-arch Architecture: ${deb-arch}
 item --menu debian-chooser debian-choose-rescue Rescue a Broken System: ${deb-rescue}
 item --menu debian-chooser debian-boot Boot Selected System
 item --menu debian-chooser main-menu Go Back
+item --menu debian-chooser debian-set-append Additional Kernel Options (Advanced): ${kernel-append}
 choose --menu debian-chooser --default ${debian-chooser-edit-option} debian-chooser-edit-option || goto main-menu
 goto ${debian-chooser-edit-option}
 
+:debian-set-append
+echo -n Kernel command line: ${}
+read kernel-append ||
+goto debian-chooser
 :debian-choose-release
 menu --name debian-choose-release Release
 item --menu debian-choose-release debian Debian
@@ -93,7 +99,7 @@ exit
 
 :debian-boot
 set deb-base-dir ${mirror-url}/${deb-release}/dists/${deb-dist}/main/installer-${deb-arch}/current/images/netboot/${deb-release}-installer/${deb-arch}
-kernel ${deb-base-dir}/linux mirror/country=manual mirror/protocol=${mirror-proto} mirror/${mirror-proto}/hostname=${mirror-host} mirror/${mirror-proto}/directory=/${deb-release} mirror/${mirror-proto}/proxy= rescue/enable=${deb-rescue} ${deb-secure-opt} || goto debian-boot-failed
+kernel ${deb-base-dir}/linux mirror/country=manual mirror/protocol=${mirror-proto} mirror/${mirror-proto}/hostname=${mirror-host} mirror/${mirror-proto}/directory=/${deb-release} mirror/${mirror-proto}/proxy= rescue/enable=${deb-rescue} ${deb-secure-opt} ${kernel-append} || goto debian-boot-failed
 initrd ${deb-base-dir}/initrd.gz || goto debian-boot-failed
 boot || goto debian-boot-failed
 :debian-boot-failed
