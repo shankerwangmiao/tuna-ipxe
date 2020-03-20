@@ -21,7 +21,7 @@ goto ${os}
 :debian
 set deb-release debian
 set deb-secure-opt apt-setup/security_host=debian-security.tuna.tsinghua.edu.cn
-set deb-dist jessie
+set deb-dist buster
 set deb-arch amd64
 set deb-rescue false
 :debian-chooser
@@ -48,11 +48,11 @@ choose --menu debian-choose-release --default ${deb-release} deb-release-new ||
 iseq ${deb-release} ${deb-release-new} && goto debian-choose-release-change-no ||
 goto debian-choose-release-change-${deb-release-new}
 :debian-choose-release-change-debian
-set deb-dist jessie
+set deb-dist buster
 set deb-secure-opt apt-setup/security_host=debian-security.tuna.tsinghua.edu.cn
 goto debian-choose-release-change-no
 :debian-choose-release-change-ubuntu
-set deb-dist xenial
+set deb-dist bionic
 set deb-secure-opt apt-setup/security_host=${mirror-host} apt-setup/security_path=/ubuntu
 goto debian-choose-release-change-no
 :debian-choose-release-change-no
@@ -64,13 +64,15 @@ goto debian-choose-dist-${deb-release}
 
 :debian-choose-dist-debian
 menu --name debian-choose-dist-debian Debian Versions
+item --menu debian-choose-dist-debian buster Debian Buster 10
+item --menu debian-choose-dist-debian stretch Debian Stretch 9
 item --menu debian-choose-dist-debian jessie Debian Jessie 8
-item --menu debian-choose-dist-debian wheezy Debian Wheezy 7
 choose --menu debian-choose-dist-debian --default ${deb-dist} deb-dist ||
 goto debian-chooser
 
 :debian-choose-dist-ubuntu
 menu --name debian-choose-dist-ubuntu Ubuntu Versions
+item --menu debian-choose-dist-ubuntu xenial Ubuntu Bionic 18.04
 item --menu debian-choose-dist-ubuntu xenial Ubuntu Xenial 16.04
 item --menu debian-choose-dist-ubuntu trusty Ubuntu Trusty 14.04
 choose --menu debian-choose-dist-ubuntu --default ${deb-dist} deb-dist ||
