@@ -203,6 +203,7 @@ choose --menu linux-choose-cmdline --default ${linux-cmdline} linux-cmdline ||
 goto ${os}-chooser
 
 :debian-boot
+imgfree ||
 set deb-release-url ${deb-release}
 iseq ${os}-${deb-release}-${deb-arch} debian-ubuntu-arm64 && set deb-release-url ${deb-release-url}-ports ||
 set deb-base-dir ${mirror-url}/${deb-release-url}/dists/${deb-dist}/main/installer-${deb-arch}/current/images/netboot/${deb-release}-installer/${deb-arch}
@@ -216,6 +217,7 @@ initrd ${deb-base-dir}/initrd.gz || goto linux-boot-failed
 goto linux-boot
 
 :rhel-boot
+imgfree ||
 set rhel-release-url ${rhel-release}
 iseq ${os}-${rhel-release}-${rhel-dist}-${rhel-arch} rhel-centos-7-aarch64 && set rhel-release-url ${rhel-release-url}-altarch ||
 set rhel-base ${mirror-url}/${rhel-release-url}/${rhel-base-url}
