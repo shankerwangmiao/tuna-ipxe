@@ -207,7 +207,7 @@ goto ${os}-chooser
 imgfree ||
 set deb-release-url ${deb-release}
 set deb-legacy-images images
-iseq ${os}-${deb-release}-${deb-dist} debian-ubuntu-focal && set deb-legacy-images legacy-images
+iseq ${os}-${deb-release}-${deb-dist} debian-ubuntu-focal && set deb-legacy-images legacy-images ||
 iseq ${os}-${deb-release}-${deb-arch} debian-ubuntu-arm64 && set deb-release-url ${deb-release-url}-ports ||
 set deb-base-dir ${mirror-url}/${deb-release-url}/dists/${deb-dist}/main/installer-${deb-arch}/current/${deb-legacy-images}/netboot/${deb-release}-installer/${deb-arch}
 set deb-kernel-append-fw
